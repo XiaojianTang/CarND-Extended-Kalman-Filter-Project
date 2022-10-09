@@ -34,8 +34,6 @@
 
 为了检验各种依赖库是不是都装好了，可以再到项目的文件夹里尝试编译一下，可以编译并生成./ExtendedKF文件的话就没问题了。
 
-
-
 > 此外本项目还需要使用到由奔驰提供的用于生成并可视化用于感知融合Sensor Fusion的应用，可以生成更多的数据，用于卡尔曼滤波器的学习，项目地址为：[udacity/CarND-Mercedes-SF-Utilities: Tools for Sensor Fusion processing. (github.com)](https://github.com/udacity/CarND-Mercedes-SF-Utilities)
 
 ## 4. 项目任务
@@ -50,7 +48,7 @@
 
 ### kalman_filter.cpp以及kalman_filter.h
 
-待续
+未完待续
 
 ### FusionEKF.cpp及FusionEKF.h
 
