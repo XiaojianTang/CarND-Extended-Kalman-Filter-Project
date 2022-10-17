@@ -36,7 +36,7 @@ FusionEKF::FusionEKF() {
    * TODO: Finish initializing the FusionEKF.
    * TODO: Set the process and measurement noises
    */
-
+  
 
 }
 
@@ -65,10 +65,36 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // TODO: Convert radar from polar to cartesian coordinates 
       //         and initialize state.
 
+      // according to main.cpp 
+      // ro: measurement_pack.raw_measurements_[0]
+      // theta:  measurement_pack.raw_measurements_[1]
+      // ro_dot:  measurement_pack.raw_measurements_[2]
+      float ro = measurement_pack.raw_measurements_[0];
+      float theta = measurement_pack.raw_measurements_[1];
+      float ro_dat = measurement_pack.raw_measurements_[2];
+
+      // according to trigonometry:
+      // tan(theta) = py/ro -> py = ro*tan(theta) 
+      // cot(theta) = px/ro -> px = ro*cot(theta)
+      
+      //initialize px      
+      ekf_.x_[0] = ro*tan(theta);
+
+      //initialize py
+      ekf_.x_[1] = ro*(1/tan(theta));    
+
+      //uable to initialize vx,vy from ro_dot  
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // TODO: Initialize state.
 
+      //initialize px
+      float px = measurement_pack.raw_measurements_[0];
+
+      //initialize py
+      float py = measurement_pack.raw_measurements_[1];
+
+      //unable to initialize vx,vy from lidar measurements
     }
 
     // done initializing, no need to predict or update
