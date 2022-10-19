@@ -75,6 +75,18 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   MatrixXd K_ = P_*H_.transpose()*S_.inverse();
   MatrixXd I_ = MatrixXd(4,4).Identity();   
 
+  //normalize angel value in y_
+  #include <cmath>
+  while(y_[1]<-M_PI)
+  {
+    y_[1]+=2*M_PI;
+  }
+
+  while (y_[1]>M_PI)
+  {
+    y_[1]-=2*M_PI;
+  }
+
   x_ = x_ + K_*y_;
   P_ = (I_-K_*H_)*P_;
 }
