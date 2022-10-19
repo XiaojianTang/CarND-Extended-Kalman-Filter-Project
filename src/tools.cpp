@@ -52,7 +52,15 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
    float c1 = pow(px,2) + pow(py,2);
    float c2 = sqrt(c1);
-   float c3 = c1*c3;
+   float c3 = c1*c2;
+
+   //check data validation
+   if (c1==0)
+   {
+      std::cout << "Invalid data: Can't divided by zero!";
+      return Hj_;
+   }
+   
 
    Hj_ << px/c2, py/c2, 0, 0,
           -py/c1, -px/c1, 0, 0,
