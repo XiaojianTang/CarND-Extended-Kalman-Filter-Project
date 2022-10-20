@@ -32,6 +32,8 @@ void KalmanFilter::Predict() {
 
   //predict covariance P_
   P_=F_*P_*F_.transpose() + Q_;
+
+  return;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
@@ -39,10 +41,14 @@ void KalmanFilter::Update(const VectorXd &z) {
    * TODO: update the state by using Kalman Filter equations
    */
 
-  MatrixXd y_ = z-H_*x_;
+  VectorXd y_ = z-H_*x_;
   MatrixXd S_ = H_*P_*H_.transpose() + R_;
   MatrixXd K_ = P_*H_.transpose()*S_.inverse();
-  MatrixXd I_ = MatrixXd(4,4).Identity(); 
+  MatrixXd I_(4,4);
+  I_ << 1,0,0,0,
+      0,1,0,0,
+      0,0,1,0,
+      0,0,0,1;
 
   x_ = x_ + K_*y_;
   P_ = (I_-K_*H_)*P_;
@@ -56,35 +62,38 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
    */
 
   //calculate h(x) function
-  float px=x_[0];
-  float py=x_[1];
-  float vx=x_[2];
-  float vy=x_[3];  
+  float px=x_(0);
+  float py=x_(1);
+  float vx=x_(2);
+  float vy=x_(3); 
   
-  float ro = sqrt(pow(px,2) + pow(py,2));
-  float phi = atan2(px,py);
-  float ro_dot = (px*vx + py*vy)/ro;
+  VectorXd hx_(3);
+  
+  if(fabs(pow(px,2.0) + pow(py,2.0))>0.0001 and fabs(py)>0.0001){  
+    float ro = sqrt(pow(px,2.0) + pow(py,2.0));
+    float phi = atan2(py,px);
+    float ro_dot = (px*vx + py*vy)/ro;
+  
+    hx_ << ro, phi, ro_dot;}   
 
-  MatrixXd hx_(3,1);
-  hx_ << ro,
-         phi,
-         ro_dot;   
-
-  MatrixXd y_ = z-hx_;
+  VectorXd y_ = z-hx_;
   MatrixXd S_ = H_*P_*H_.transpose() + R_;
   MatrixXd K_ = P_*H_.transpose()*S_.inverse();
-  MatrixXd I_ = MatrixXd(4,4).Identity();   
+  MatrixXd I_(4,4);
+  I_ << 1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1;
 
-  //normalize angel value in y_
-  #include <cmath>
-  while(y_[1]<-M_PI)
+  //normalize angel value in y_  
+  if(y_(1)<-M_PI)
   {
-    y_[1]+=2*M_PI;
+    y_(1)=y_(1)+2*M_PI;
   }
 
-  while (y_[1]>M_PI)
+  else if (y_(1)>M_PI)
   {
-    y_[1]-=2*M_PI;
+    y_(1)=y_(1)-2*M_PI;
   }
 
   x_ = x_ + K_*y_;

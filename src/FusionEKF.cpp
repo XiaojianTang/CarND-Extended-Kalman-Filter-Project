@@ -65,21 +65,20 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
       // according to main.cpp 
       // ro: measurement_pack.raw_measurements_[0]
-      // theta:  measurement_pack.raw_measurements_[1]
+      // phi:  measurement_pack.raw_measurements_[1]
       // ro_dot:  measurement_pack.raw_measurements_[2]
       float ro = measurement_pack.raw_measurements_[0];
-      float theta = measurement_pack.raw_measurements_[1];
-      float ro_dat = measurement_pack.raw_measurements_[2];
-
+      float phi = measurement_pack.raw_measurements_[1];
+      
       // according to trigonometry:
-      // tan(theta) = py/ro -> py = ro*tan(theta) 
-      // cot(theta) = px/ro -> px = ro*cot(theta)
+      // sin(phi) = py/ro -> py = ro*sin(phi) 
+      // cos(phi) = px/ro -> px = ro*cos(phi)
       
       //initialize px      
-      ekf_.x_[0] = ro*tan(theta);
+      ekf_.x_(0) = ro*cos(phi);
 
       //initialize py
-      ekf_.x_[1] = ro*(1/tan(theta));    
+      ekf_.x_(1) = ro*sin(phi);    
 
       //uable to initialize vx,vy from ro_dot            
     }
@@ -88,10 +87,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // TODO: Initialize state.
 
       //initialize px
-      ekf_.x_[0] = measurement_pack.raw_measurements_[0];
+      ekf_.x_(0) = measurement_pack.raw_measurements_[0];
 
       //initialize py
-      ekf_.x_[1] = measurement_pack.raw_measurements_[1];
+      ekf_.x_(1) = measurement_pack.raw_measurements_[1];
 
       //unable to initialize vx,vy from lidar measurements
     }
@@ -100,10 +99,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     previous_timestamp_ = measurement_pack.timestamp_;
     
     //initialize covariance matrix P_
+    ekf_.P_ = MatrixXd(4,4);
     ekf_.P_ <<1000,0,0,0,
               0,1000,0,0,
-              0,0,1000,0,
-              0,0,0,1000; 
+              0,0,1,0,
+              0,0,0,1; 
 
     //define matrix H_laser_    
     H_laser_ << 1,0,0,0,
@@ -126,12 +126,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   //calculate delta_t
-  float delta_t = (measurement_pack.timestamp_- previous_timestamp_)/1000000000;
+  float delta_t = (measurement_pack.timestamp_- previous_timestamp_)/1000000.0;
     
   //update timestamp
   previous_timestamp_ = measurement_pack.timestamp_;
 
-  //update matrix F with elapsed time    
+  //update matrix F with elapsed time
+  ekf_.F_=MatrixXd(4,4);    
   ekf_.F_ << 1,0,delta_t,0,
              0,1,0,delta_t,
              0,0,1,0,
@@ -140,10 +141,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   //update matrix Q
   float noise_ax = 9;
   float noise_ay = 9;
-  ekf_.Q_ << pow(delta_t,4)*pow(noise_ax,2)/4 , 0 , pow(delta_t,3)*pow(noise_ax,2) , 0 ,
-               0,  pow(delta_t,4)*pow(noise_ay,2)/4 , 0 , pow(delta_t,3)*pow(noise_ay,2),
-               pow(delta_t,3)*pow(noise_ax,2)/2 , 0 , pow(delta_t,2)*pow(noise_ax,2),0,
-               0, pow(delta_t,3)*pow(noise_ay,2)/2 , 0 ,  pow(delta_t,2)*pow(noise_ay,2);
+  ekf_.Q_=MatrixXd(4,4);
+  ekf_.Q_ << pow(delta_t,4.0)/4*noise_ax , 0 , pow(delta_t,3.0)/2*noise_ax , 0 ,
+               0,  pow(delta_t,4.0)/4*noise_ay , 0 , pow(delta_t,3.0)/2*noise_ay,
+               pow(delta_t,3.0)/2*noise_ax , 0 , pow(delta_t,2.0)*noise_ax,0,
+               0, pow(delta_t,3.0)/2*noise_ay , 0 ,  pow(delta_t,2.0)*noise_ay;
 
   ekf_.Predict();
 
@@ -159,19 +161,25 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // TODO: Radar updates  
-    
+        
     Hj_= tools.CalculateJacobian(ekf_.x_); 
+    ekf_.R_=MatrixXd(3,3);
     ekf_.R_ = R_radar_;
+
+    ekf_.H_=MatrixXd(3,4);
     ekf_.H_ = Hj_;    
-    ekf_.Update(measurement_pack.raw_measurements_);    
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_);    
 
 
   } else {
     // TODO: Laser updates                    
 
+    ekf_.R_=MatrixXd(2,2);
     ekf_.R_ = R_laser_;
+
+    ekf_.H_=MatrixXd(2,4);
     ekf_.H_ = H_laser_;    
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_); 
+    ekf_.Update(measurement_pack.raw_measurements_); 
   }
 
   // print the output
