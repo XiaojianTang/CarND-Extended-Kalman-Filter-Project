@@ -12,21 +12,25 @@
 
 为了进行可视化展示，项目提供了一个[模拟器Simulator](https://github.com/udacity/self-driving-car-sim/releases "点击可跳转至下载链接")，可以直接下载到本地安装。
 
-## 3. uWebSockets
+## 3. 开发环境配置
 
 如果只把原项目和模拟器下载到本地的话，大概率是编译不了的，原项目的main.cpp文件中的#include `<uWS/uWS.h>大概率是找不到的，`为了能让程序顺利编译，同时为了能让代码生成的结果和模拟器连接，还需要使用uWebSocketIO。但这玩意在windows上很麻烦。可以用vcpkg来下载安装，但我反正没成功，各种坑，多半和开发环境，工具链配置有关，最后选择了用Ubuntu Bash在windows上运行虚拟机来进行本地编译。
 
-### 安装Ubuntu Bash
+### 选择一：Ubuntu Bash
 
 但这个软件只能用在Linux和Mac OS上，Windows上直接使用比较麻烦。我使用的是Window 10的系统，则需要对开发环境进行特殊的配置，通过安装Linux Bash来获得Linux的环境，从而更好的使用uWebSocketIO，点这里可以查看Win10上安装Ubuntu的[安装步骤](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/ "点击可查看安装步骤")。
 
-### 安装uWebSockets所需依赖库
+### 选择二：虚拟机
 
-安装好Ubuntu后，需要通过apt-get安装几个uWebSockets要的依赖库，包括cmake，libssl-dev，openssl之类的（之后编译的时候可能会弹出些错误，缺啥就装啥了，需要注意看log）
+通过 windows 的 Ubuntu Bash 会有各种各样的问题，也可以通过Udacity 提供的虚拟机进行。虚拟机本来用于最后的Capstone项目中运行ROS系统，实测也可以用于其他项目。虚拟机可以点击[这里](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/Udacity_VM_Base_V1.0.0.zip)下载。*（注意虚拟机里Linux系统的密码为 udacity-nd）*
+
+### 安装uWebSockets所需依赖库（可略过）
+
+安装好Ubuntu或虚拟机后，需要通过apt-get安装几个uWebSockets要的依赖库，包括cmake，libssl-dev，openssl之类的（之后编译的时候可能会弹出些错误，缺啥就装啥了，需要注意看log）
 
 ### 安装uWebSockets
 
-安装好依赖库后，原项目的文件夹有一个install-linux.sh的文件，用 `chmod a+x install-ubuntu.sh` 直接运行应该是会自动安装好uWebSockets的。
+为了简化安装，原项目提供了一个 ` install-linux.sh` 的文件，可用 ` ./install-linux.sh` 或 `chmod a+x install-ubuntu.sh` 直接运行应该是会自动安装好uWebSockets及所需要的依赖库的。
 
 也可以手动安装。回到用户目录下，通过git把uWebSockets的github仓库克隆下来，然后在uWebSockets的仓库的文件夹里面先用 `mkdir build`新建一个build文件夹，然后进到build里，然后用 `cmake.. && make`编译并运行一下，这样uWebSockets就算安装好了。过程会出几次错，一般是少了一些必要的库，用apt-get安装后再试试就行了，可能是g++，可能是libuv1.dev
 
@@ -40,12 +44,9 @@
 
 ### 本地开发
 
-配置好环境后就可以愉快的进行本地开发了。虽然再Udacity的网站里可以通过他们提供的workspace特别简单的进行项目，所有环境都是配置好了的，我还是选择在本地开发了。一是因为网络问题，即不太稳定也不想一直连着网在线写代码；二是自己建立仓库再本地开发能更熟悉从搭建环境到编译运行的全过程；三是可以通过自己的仓库记录下整个项目过程，也方便以后回头来复习或者分享给别人。
-
-另外需要注意的是，我个人不是很会在Ubuntu里写代码，于是还是用的VS code编辑器来编辑代码，然后通过git插件把代码同步到自己的仓库里，然后再回到Ubuntu Bash里pull一下，然后再编译看看结果。
+配置好环境后就可以愉快的进行本地开发了。虽然在Udacity的网站里可以通过他们提供的 workspace 特别简单的进行项目，所有环境都是配置好了的，我还是选择在本地开发了。一是因为网络问题，即不太稳定也不想一直连着网在线写代码；二是自己建立仓库再本地开发能更熟悉从搭建环境到编译运行的全过程；三是可以通过自己的仓库记录下整个项目过程，也方便以后回头来复习或者分享给别人。
 
 需要完成代码的文件有FusionEKF.cpp，FusionEKF.cpp，FusionEKF.h，kalman_filter.cpp，kalman_filter.h， tools.cpp和tools.h，main.cpp是原项目提供的，无需修改。
-
 
 ### `kalman_filter.cpp`以及 `kalman_filter.h`
 
@@ -62,7 +63,6 @@
 | Update()    | 根据激光雷达的感知数据，更新x_ 及 P_       |
 | UpdateEKF() | 根据毫米波雷达的感知数据，更新x_ 及 P_     |
 
-
 #### `Init()`
 
 在 `Init()`函数中，将输入变量分别赋值给相关变量即可:
@@ -76,8 +76,6 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in, MatrixXd
   R_ = R_in;
   Q_ = Q_in;}
 ```
-
-
 
 #### `Predict()`
 
@@ -96,8 +94,6 @@ void KalmanFilter::Predict() {
   return;
 }
 ```
-
-
 
 #### `Update()`
 
@@ -123,7 +119,6 @@ void KalmanFilter::Update(const VectorXd &z) {
   x_ = x_ + K_*y_;
   P_ = (I_-K_*H_)*P_;}
 ```
-
 
 #### `UpdateEKF()`
 
@@ -168,11 +163,9 @@ else if (y_(1)>M_PI){
 
 另外还需要注意，在 `UpdateEKF()` 中计算 `S_ `和 `K_ `以及 `P_ `所使用的 `H_ `与激光雷达所用的 `H_ `不同。不同 `H_ `的计算方式在 `FusionEKF.cpp` 中另外进行定义。
 
-
 ### `FusionEKF.cpp` 及 `FusionEKF.h`
 
 本项目的主体代码主要在 FusionEKF.cpp 中，其中实现了卡尔曼滤波器从初始化、到预测，到测量更新的全过程。因为激光雷达的感知数据以及毫米波雷达的感知数据采用的坐标系不同，二者所对应的**测量方程 H** 和**传感器的协方差矩阵 R (表示传感器的设备测量精度）** 均不相同，在FusionEKF.h 的头文件中分别定义为 `H_laser_，R_laser_`和 ` Hj_，R_radar_`。
-
 
 #### 初始化
 
@@ -195,7 +188,6 @@ R_radar_ << 0.09, 0, 0,
             0, 0, 0.09;
 ```
 
-
 * **x_ 的初始化**
 
 如目前状态为未初始化状态，则在收到第一份传感器数据时首先需要进行初始化。而后需要根据收到的第一份数据是来自激光雷达还是毫米波雷达，做不同的处理。如为毫米波雷达，则需根据毫米波雷达感知到的 ro 和 phi 经坐标转换后，对 x_(0) 和 x_(1) 进行初始化：
@@ -217,7 +209,6 @@ ekf_.x_(1) = measurement_pack.raw_measurements_[1];
 
 需要注意的是，即使毫米波雷达可以感知速度，但因为物体运动方向并不确定，因此也不能对速度进行初始化，因此 `x_(2),x_(3)`既 `vx，vy`的初始值定义为 1 即可。
 
-
 * **P_ 的初始化**
 
 此外，还需对P_ 和 H_ 进行初始化。其中 P 矩阵一般可初始化为：
@@ -234,7 +225,6 @@ ekf_.P_ <<1000,0,0,0,
           0,0,0,1; 
 ```
 
-
 * **H_laser 的初始化**
 
 因毫米波雷达的测量方程 Hj_ 需要根据测量数据计算，因此无法进行初始化。激光雷达的测量方程 H_laser 可根据
@@ -247,7 +237,6 @@ ekf_.P_ <<1000,0,0,0,
 H_laser_ << 1,0,0,0,
             0,1,0,0;  
 ```
-
 
 #### 预测
 
@@ -277,7 +266,6 @@ ekf_.Q_ << pow(delta_t,4.0)/4*noise_ax , 0 , pow(delta_t,3.0)/2*noise_ax , 0 ,
 ekf_.Predict();
 ```
 
-
 #### 更新
 
 * **激光雷达的测量更新**
@@ -293,7 +281,6 @@ ekf_.H_ = H_laser_;
 ekf_.Update(measurement_pack.raw_measurements_); 
 ```
 
-
 * **毫米波雷达的测量更新**
 
 毫米波雷达的测量更新稍复杂些，先要计算 `Hj_` 矩阵，后将 `Hj_` 矩阵和 `R_radar` 传递给 `class KalmanFilter` 中的 `H_ `和 `R_`，再调用 `UpdateEKF() `函数。其中 `Hj_` 的计算需要调用 `tool.cpp` 中的 `CalculateJacobian()` 函数。部分参考代码如下：
@@ -307,7 +294,6 @@ ekf_.H_=MatrixXd(3,4);
 ekf_.H_ = Hj_;  
 ekf_.UpdateEKF(measurement_pack.raw_measurements_); 
 ```
-
 
 ### `tool.cpp`
 
@@ -343,14 +329,13 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    return Hj_;}
 ```
 
-
 ## 5. 运行结果
 
 完成代码后，再ubuntu环境中，进入项目文件夹，依次通过如下命令行命令即可编译并运行项目：
 
 ```
 mkdir build && cd build
-cmake .. && make
+cmake .. && make 或 cmake .. -G "Unix Makefiles" && make
 ./ExtendedKF
 ```
 
