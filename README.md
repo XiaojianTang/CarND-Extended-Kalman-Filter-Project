@@ -26,9 +26,9 @@
 
 ### 安装uWebSockets
 
-安装好依赖库后，原项目的文件夹有一个install-ubuntu.sh的文件，直接运行应该是会自动安装好uWebSockets的，但我试了试并没有反应，所以就手动安装了。
+安装好依赖库后，原项目的文件夹有一个install-linux.sh的文件，用 `chmod a+x install-ubuntu.sh` 直接运行应该是会自动安装好uWebSockets的。
 
-回到用户目录下，通过git把uWebSockets的github仓库克隆下来，然后在uWebSockets的仓库的文件夹里面先用 `mkdir build`新建一个build文件夹，然后进到build里，然后用 `cmake.. && make`编译并运行一下，这样uWebSockets就算安装好了。过程会出几次错，一般是少了一些必要的库，用apt-get安装后再试试就行了，可能是g++，可能是libuv1.dev
+也可以手动安装。回到用户目录下，通过git把uWebSockets的github仓库克隆下来，然后在uWebSockets的仓库的文件夹里面先用 `mkdir build`新建一个build文件夹，然后进到build里，然后用 `cmake.. && make`编译并运行一下，这样uWebSockets就算安装好了。过程会出几次错，一般是少了一些必要的库，用apt-get安装后再试试就行了，可能是g++，可能是libuv1.dev
 
 ### 试编译项目
 
